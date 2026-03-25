@@ -9,44 +9,39 @@
     <style>
         body { background-color: #fdfaf3; font-family: 'Libre Baskerville', serif; margin: 0; color: #333; line-height: 1.6; }
         
-        /* Header Styling */
         .hero { 
             background: linear-gradient(135deg, #1a5e63 0%, #0d2f31 100%); 
-            padding: 80px 20px; 
-            text-align: center; 
-            color: white; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 60px 20px; text-align: center; color: white; 
         }
-        .hero h1 { font-family: 'Montserrat', sans-serif; letter-spacing: 6px; color: #f4d03f; margin: 0; font-size: 2.2rem; text-transform: uppercase; }
-        .hero p { font-family: 'Montserrat', sans-serif; letter-spacing: 3px; font-size: 0.85rem; opacity: 0.9; margin-top: 12px; font-weight: 300; }
+        .hero h1 { font-family: 'Montserrat', sans-serif; letter-spacing: 6px; color: #f4d03f; margin: 0; font-size: 2rem; }
         
-        /* Container */
-        .container { max-width: 800px; margin: -40px auto 60px; padding: 0 20px; }
+        .container { max-width: 800px; margin: -30px auto 60px; padding: 0 20px; }
         
-        /* Loading & Error States */
-        #status-msg { text-align: center; padding: 60px; color: #1a5e63; font-family: 'Montserrat'; font-weight: 600; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        
-        /* Article Cards */
+        /* Card Styling */
         .card { 
-            background: white; 
-            padding: 40px; 
-            border-radius: 15px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
-            margin-bottom: 40px; 
-            border: 1px solid #eee; 
-            transition: transform 0.3s ease;
+            background: white; padding: 30px; border-radius: 12px; 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05); margin-bottom: 20px; 
+            border: 1px solid #eee; transition: 0.3s; cursor: pointer;
+            overflow: hidden;
         }
-        .card:hover { transform: translateY(-5px); }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-color: #1a5e63; }
         
-        .syllabus-tag { color: #b8860b; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; display: block; }
-        .card h2 { font-family: 'Montserrat', sans-serif; color: #1a5e63; margin: 10px 0 20px 0; font-size: 1.8rem; line-height: 1.2; border-bottom: 2px solid #f4d03f; display: inline-block; padding-bottom: 5px; }
+        .syllabus-tag { color: #b8860b; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1.2px; }
+        .card h2 { font-family: 'Montserrat', sans-serif; color: #1a5e63; margin: 10px 0; font-size: 1.5rem; }
         
-        /* Content Formatting */
-        .content-area { font-size: 1.15rem; color: #2c3e50; text-align: justify; }
-        .content-area p { margin-bottom: 20px; }
-        .content-area img { max-width: 100%; border-radius: 10px; margin: 25px 0; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        /* Excerpt vs Full Content */
+        .excerpt { color: #666; font-size: 1rem; display: block; }
+        .full-content { display: none; margin-top: 20px; padding-top: 20px; border-top: 1px dashed #ccc; }
+        .full-content img { max-width: 100%; border-radius: 8px; margin: 20px 0; }
         
-        footer { text-align: center; padding: 40px; font-family: 'Montserrat'; font-size: 0.8rem; color: #999; letter-spacing: 1px; }
+        /* When card is active */
+        .card.active { cursor: default; border-left: 5px solid #f4d03f; }
+        .card.active .excerpt { display: none; }
+        .card.active .full-content { display: block; }
+
+        .read-more { color: #1a5e63; font-weight: bold; font-size: 0.8rem; text-transform: uppercase; margin-top: 15px; display: inline-block; }
+        
+        #status-msg { text-align: center; padding: 40px; font-family: 'Montserrat'; }
     </style>
 </head>
 <body>
@@ -61,18 +56,10 @@
     <div id="articles-list"></div>
 </div>
 
-<footer>
-    &copy; 2026 THE ENGLISH ARCHIVE
-</footer>
-
 <script>
-    // --- SETTINGS ---
     const GITHUB_USER = "mithunbiswas15-git"; 
     const REPO_NAME = "mythra"; 
-    const FILE_NAME = "articles.csv";
-    
-    // The "Raw" link that allows the website to read the file
-    const csvUrl = `https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/main/${FILE_NAME}`;
+    const csvUrl = `https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/main/articles.csv`;
 
     function loadData() {
         Papa.parse(csvUrl, {
@@ -81,41 +68,37 @@
             skipEmptyLines: true,
             complete: function(results) {
                 const list = document.getElementById('articles-list');
-                const status = document.getElementById('status-msg');
+                document.getElementById('status-msg').style.display = 'none';
                 
-                // Sort by ID (Newest at the top)
-                const sortedArticles = results.data.sort((a, b) => b.id - a.id);
+                // Sort Newest First
+                const sorted = results.data.sort((a, b) => b.id - a.id);
 
-                let hasContent = false;
-
-                sortedArticles.forEach(art => {
+                sorted.forEach(art => {
                     if(art.title && art.status === "Published") {
-                        hasContent = true;
                         const card = document.createElement('div');
                         card.className = 'card';
                         
+                        // Create a clean text summary (no HTML tags)
+                        const plainText = art.content.replace(/<[^>]*>/g, '').substring(0, 120);
+
                         card.innerHTML = `
-                            <span class="syllabus-tag">${art.syllabus || 'General Literature'}</span>
+                            <span class="syllabus-tag">${art.syllabus || 'Archive'}</span>
                             <h2>${art.title}</h2>
-                            <div class="content-area">${art.content}</div>
+                            <div class="excerpt">${plainText}... <br><span class="read-more">Click to read full note →</span></div>
+                            <div class="full-content">${art.content}</div>
                         `;
+                        
+                        // Click to Expand Logic
+                        card.onclick = function() {
+                            this.classList.toggle('active');
+                        };
+                        
                         list.appendChild(card);
                     }
                 });
-
-                if (hasContent) {
-                    status.style.display = 'none';
-                } else {
-                    status.innerHTML = "The archive is currently being updated. Check back soon!";
-                }
-            },
-            error: function(err) {
-                document.getElementById('status-msg').innerHTML = "⚠️ Technical error: Ensure 'articles.csv' is uploaded to your GitHub repository.";
             }
         });
     }
-
-    // Initialize
     loadData();
 </script>
 

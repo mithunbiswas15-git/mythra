@@ -4,18 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The English Archive</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville&family=Montserrat:wght@300;600&display=swap" rel="stylesheet">
     <style>
         body { background-color: #fdfaf3; font-family: 'Libre Baskerville', serif; margin: 0; color: #333; }
-        .hero { background: linear-gradient(135deg, #1a5e63 0%, #0d2f31 100%); padding: 60px 20px; text-align: center; color: white; }
-        .hero h1 { font-family: 'Montserrat', sans-serif; letter-spacing: 6px; color: #f4d03f; margin: 0; }
-        .container { max-width: 900px; margin: -30px auto 40px; padding: 0 20px; }
-        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #eee; transition: 0.3s; cursor: pointer; }
-        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
-        .card h3 { font-family: 'Montserrat', sans-serif; color: #1a5e63; margin: 10px 0; }
-        .syllabus { color: #b8860b; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
-        #loading { text-align: center; padding: 50px; color: #1a5e63; font-family: 'Montserrat'; }
+        .hero { 
+            background: linear-gradient(135deg, #1a5e63 0%, #0d2f31 100%); 
+            padding: 80px 20px; 
+            text-align: center; 
+            color: white; 
+        }
+        .hero h1 { font-family: 'Montserrat', sans-serif; letter-spacing: 6px; color: #f4d03f; margin: 0; font-size: 2.5rem; }
+        .hero p { font-family: 'Montserrat', sans-serif; letter-spacing: 3px; font-size: 0.9rem; opacity: 0.8; margin-top: 10px; }
+        
+        .container { max-width: 850px; margin: -40px auto 60px; padding: 0 20px; }
+        
+        #loading { text-align: center; padding: 50px; color: #1a5e63; font-family: 'Montserrat'; font-weight: bold; }
+        
+        .card { 
+            background: white; 
+            padding: 35px; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+            margin-bottom: 30px; 
+            border: 1px solid #eee; 
+            transition: 0.3s; 
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.1); }
+        
+        .syllabus { color: #b8860b; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        .card h3 { font-family: 'Montserrat', sans-serif; color: #1a5e63; margin: 15px 0; font-size: 1.6rem; line-height: 1.3; }
+        
+        /* The Article Content Area */
+        .content-body { line-height: 1.8; font-size: 1.1rem; color: #444; }
+        .content-body img { max-width: 100%; border-radius: 8px; margin: 20px 0; }
+        
+        hr { border: 0; border-top: 1px solid #eee; margin: 30px 0; }
     </style>
 </head>
 <body>
@@ -25,42 +49,55 @@
     <p>RECLAIMING THE MARGINS</p>
 </div>
 
-<div class="container" id="app">
-    <div id="loading">Gathering manuscripts...</div>
+<div class="container">
+    <div id="loading">📜 Unrolling the manuscripts...</div>
     <div id="articles-list"></div>
 </div>
 
 <script>
-    // 1. YOUR CONNECTION (Same as before)
-    const SUPABASE_URL = "https://tekhlzsoxqndshfennaq.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRla2hsenNveHFuZHNoZmVubmFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MjI3MTMsImV4cCI6MjA4OTM5ODcxM30.cgtcH3MxoiMjttYUHcL52gGH0EXtRp3pkil73GywVrc";
-    const supabase = lib.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // --- CONFIGURATION ---
+    // Change 'mithunbiswas15-git' to your actual GitHub username
+    const username = "mithunbiswas15-git"; 
+    const repo = "mythra"; 
+    const csvUrl = `https://raw.githubusercontent.com/${username}/${repo}/main/articles.csv`;
 
-    async function loadArticles() {
-        const { data, error } = await supabase
-            .from('articles')
-            .select('*')
-            .eq('status', 'Published')
-            .order('id', { ascending: false });
+    function loadArchive() {
+        Papa.parse(csvUrl, {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                const list = document.getElementById('articles-list');
+                document.getElementById('loading').style.display = 'none';
+                
+                // Sort articles by ID descending (newest first)
+                const sortedData = results.data.sort((a, b) => b.id - a.id);
 
-        const list = document.getElementById('articles-list');
-        document.getElementById('loading').style.display = 'none';
-
-        if (data) {
-            data.forEach(art => {
-                const div = document.createElement('div');
-                div.className = 'card';
-                div.innerHTML = `
-                    <div class="syllabus">${art.syllabus}</div>
-                    <h3>${art.title}</h3>
-                    <p>${art.content.replace(/<[^>]*>/g, '').substring(0, 150)}...</p>
-                `;
-                div.onclick = () => alert("Opening Full Article feature coming in Step 2!");
-                list.appendChild(div);
-            });
-        }
+                sortedData.forEach(art => {
+                    if(art.title && art.status === "Published") {
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        
+                        // We render the full HTML content from your Supabase 'content' column
+                        card.innerHTML = `
+                            <div class="syllabus">${art.syllabus}</div>
+                            <h3>${art.title}</h3>
+                            <hr>
+                            <div class="content-body">${art.content}</div>
+                        `;
+                        list.appendChild(card);
+                    }
+                });
+            },
+            error: function(err) {
+                document.getElementById('loading').innerHTML = "⚠️ The archive is temporarily undergoing maintenance. Please check back shortly.";
+            }
+        });
     }
-    loadArticles();
+
+    // Start the engine
+    loadArchive();
 </script>
+
 </body>
 </html>

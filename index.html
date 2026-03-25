@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The English Archive</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville&family=Montserrat:wght@300;600&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #fdfaf3; font-family: 'Libre Baskerville', serif; margin: 0; color: #333; }
+        .hero { background: linear-gradient(135deg, #1a5e63 0%, #0d2f31 100%); padding: 60px 20px; text-align: center; color: white; }
+        .hero h1 { font-family: 'Montserrat', sans-serif; letter-spacing: 6px; color: #f4d03f; margin: 0; }
+        .container { max-width: 900px; margin: -30px auto 40px; padding: 0 20px; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #eee; transition: 0.3s; cursor: pointer; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .card h3 { font-family: 'Montserrat', sans-serif; color: #1a5e63; margin: 10px 0; }
+        .syllabus { color: #b8860b; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
+        #loading { text-align: center; padding: 50px; color: #1a5e63; font-family: 'Montserrat'; }
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <h1>THE ENGLISH ARCHIVE</h1>
+    <p>RECLAIMING THE MARGINS</p>
+</div>
+
+<div class="container" id="app">
+    <div id="loading">Gathering manuscripts...</div>
+    <div id="articles-list"></div>
+</div>
+
+<script>
+    // 1. YOUR CONNECTION (Same as before)
+    const SUPABASE_URL = "YOUR_SUPABASE_URL_HERE";
+    const SUPABASE_KEY = "YOUR_SUPABASE_KEY_HERE";
+    const supabase = lib.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function loadArticles() {
+        const { data, error } = await supabase
+            .from('articles')
+            .select('*')
+            .eq('status', 'Published')
+            .order('id', { ascending: false });
+
+        const list = document.getElementById('articles-list');
+        document.getElementById('loading').style.display = 'none';
+
+        if (data) {
+            data.forEach(art => {
+                const div = document.createElement('div');
+                div.className = 'card';
+                div.innerHTML = `
+                    <div class="syllabus">${art.syllabus}</div>
+                    <h3>${art.title}</h3>
+                    <p>${art.content.replace(/<[^>]*>/g, '').substring(0, 150)}...</p>
+                `;
+                div.onclick = () => alert("Opening Full Article feature coming in Step 2!");
+                list.appendChild(div);
+            });
+        }
+    }
+    loadArticles();
+</script>
+</body>
+</html>

@@ -3,37 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
     <title>The English Archive | Reclaiming the Margins</title>
+    <meta name="description" content="The English Archive: Free, peer-reviewed notes for BA English Honours students. Expert analysis of Oedipus Rex, Greek Tragedy, and Classical Literature.">
+    <meta name="keywords" content="English Honours Notes, BA English India, Oedipus Rex Analysis, Greek Tragedy Features, The English Archive, Mithun Biswas">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://mythra.vercel.app">
+
+    <meta property="og:title" content="The English Archive | Academic Notes">
+    <meta property="og:description" content="Affordable, peer-reviewed notes for English Literature students in India.">
+    <meta property="og:url" content="https://mythra.vercel.app">
+    <meta property="og:type" content="website">
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville&family=Montserrat:wght@300;600&display=swap" rel="stylesheet">
+    
     <style>
         body { background-color: #fdfaf3; font-family: 'Libre Baskerville', serif; margin: 0; color: #333; line-height: 1.6; }
-        
-        .hero { 
-            background: linear-gradient(135deg, #1a5e63 0%, #0d2f31 100%); 
-            padding: 50px 20px; text-align: center; color: white; 
-        }
-        .hero h1 { font-family: 'Montserrat', sans-serif; letter-spacing: 6px; color: #f4d03f; margin: 0; font-size: 2rem; }
-        
+        .hero { background: linear-gradient(135deg, #1a5e63 0%, #0d2f31 100%); padding: 50px 20px; text-align: center; color: white; }
+        .hero h1 { font-family: 'Montserrat', sans-serif; letter-spacing: 6px; color: #f4d03f; margin: 0; font-size: 2rem; text-transform: uppercase; }
         .container { max-width: 800px; margin: -30px auto 60px; padding: 0 20px; }
 
         /* Search Bar */
         #search-container { margin-bottom: 25px; }
-        #search-bar { 
-            width: 100%; padding: 15px; border-radius: 8px; border: 1px solid #ddd; 
-            font-family: 'Montserrat'; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            box-sizing: border-box; font-size: 1rem; outline: none;
-        }
+        #search-bar { width: 100%; padding: 15px; border-radius: 8px; border: 1px solid #ddd; font-family: 'Montserrat'; box-shadow: 0 4px 15px rgba(0,0,0,0.05); box-sizing: border-box; font-size: 1rem; outline: none; }
         #search-bar:focus { border-color: #1a5e63; }
 
         /* List View */
-        .card { 
-            background: white; padding: 30px; border-radius: 12px; 
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05); margin-bottom: 20px; 
-            border: 1px solid #eee; transition: 0.3s; cursor: pointer;
-        }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #eee; transition: 0.3s; cursor: pointer; }
         .card:hover { transform: translateY(-3px); border-color: #1a5e63; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        
         .syllabus-tag { color: #b8860b; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1.2px; }
         .card h2 { font-family: 'Montserrat', sans-serif; color: #1a5e63; margin: 10px 0; font-size: 1.5rem; }
         .excerpt { color: #666; font-size: 0.95rem; }
@@ -41,16 +39,10 @@
         /* Reader Mode */
         #reader-view { display: none; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); margin-top: -40px; }
         .btn-container { display: flex; justify-content: space-between; align-items: center; margin: 30px 0; }
-        .back-btn { 
-            background: #1a5e63; color: white; border: none; padding: 12px 24px; 
-            border-radius: 6px; font-family: 'Montserrat'; font-weight: bold; 
-            cursor: pointer; transition: 0.2s; text-transform: uppercase; font-size: 0.8rem;
-        }
+        .back-btn { background: #1a5e63; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-family: 'Montserrat'; font-weight: bold; cursor: pointer; transition: 0.2s; text-transform: uppercase; font-size: 0.8rem; }
         .back-btn:hover { background: #f4d03f; color: #1a5e63; }
-        
         .full-content-body { font-size: 1.15rem; color: #2c3e50; text-align: justify; }
         .full-content-body img { max-width: 100%; border-radius: 10px; margin: 25px 0; display: block; margin-left: auto; margin-right: auto; }
-
         #status-msg { text-align: center; padding: 40px; font-family: 'Montserrat'; }
         hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
     </style>
@@ -66,7 +58,7 @@
     <div id="status-msg">📜 Unrolling the manuscripts...</div>
     
     <div id="search-container">
-        <input type="text" id="search-bar" placeholder="Search titles, authors, or topics..." onkeyup="filterArticles()">
+        <input type="text" id="search-bar" placeholder="Search titles or topics..." onkeyup="filterArticles()">
     </div>
 
     <div id="articles-list"></div>
@@ -96,10 +88,7 @@
             skipEmptyLines: true,
             complete: function(results) {
                 document.getElementById('status-msg').style.display = 'none';
-                
-                // Keep ascending sort (1 at top) but we won't display the number
                 allArticles = results.data.sort((a, b) => parseInt(a.id) - parseInt(b.id));
-                
                 renderList(allArticles);
             }
         });
@@ -109,7 +98,6 @@
         const list = document.getElementById('articles-list');
         const reader = document.getElementById('reader-view');
         const search = document.getElementById('search-container');
-        
         list.innerHTML = '';
         reader.style.display = 'none';
         list.style.display = 'block';
@@ -120,14 +108,11 @@
                 const card = document.createElement('div');
                 card.className = 'card';
                 const plainText = art.content.replace(/<[^>]*>/g, '').substring(0, 150);
-
-                // ID is removed from the card HTML
                 card.innerHTML = `
                     <span class="syllabus-tag">${art.syllabus || 'Archive'}</span>
                     <h2>${art.title}</h2>
                     <div class="excerpt">${plainText}...</div>
                 `;
-                
                 card.onclick = () => openReader(art);
                 list.appendChild(card);
             }
@@ -148,14 +133,12 @@
         document.getElementById('search-container').style.display = 'none';
         const reader = document.getElementById('reader-view');
         const content = document.getElementById('reader-content');
-        
         content.innerHTML = `
             <span class="syllabus-tag" style="margin-top:20px; display:block;">${art.syllabus}</span>
             <h1 style="font-family: Montserrat; color: #1a5e63; margin-top:10px; line-height:1.2;">${art.title}</h1>
             <hr>
             <div class="full-content-body">${art.content}</div>
         `;
-        
         reader.style.display = 'block';
         window.scrollTo(0, 0); 
     }

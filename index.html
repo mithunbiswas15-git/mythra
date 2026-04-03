@@ -3,18 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
     <meta name="google-site-verification" content="Ixlt91Qhyd-mFAlffec_RcoPiDrEi3Lzacmya6tBqPs" />
-
     <title>The English Archive | Reclaiming the Margins</title>
     <meta name="description" content="The English Archive: Free, peer-reviewed notes for BA English Honours students. Expert analysis of Oedipus Rex, Greek Tragedy, and Classical Literature.">
     <meta name="keywords" content="English Honours Notes, BA English India, Oedipus Rex Analysis, Greek Tragedy Features, The English Archive, Mithun Biswas">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://mythra.vercel.app">
+    <link rel="canonical" href="https://mythra-blue.vercel.app">
 
     <meta property="og:title" content="The English Archive | Academic Notes">
     <meta property="og:description" content="Affordable, peer-reviewed notes for English Literature students in India.">
-    <meta property="og:url" content="https://mythra.vercel.app">
+    <meta property="og:url" content="https://mythra-blue.vercel.app">
     <meta property="og:type" content="website">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
@@ -26,19 +24,16 @@
         .hero h1 { font-family: 'Montserrat', sans-serif; letter-spacing: 6px; color: #f4d03f; margin: 0; font-size: 2rem; text-transform: uppercase; }
         .container { max-width: 800px; margin: -30px auto 60px; padding: 0 20px; }
 
-        /* Search Bar */
         #search-container { margin-bottom: 25px; }
         #search-bar { width: 100%; padding: 15px; border-radius: 8px; border: 1px solid #ddd; font-family: 'Montserrat'; box-shadow: 0 4px 15px rgba(0,0,0,0.05); box-sizing: border-box; font-size: 1rem; outline: none; }
         #search-bar:focus { border-color: #1a5e63; }
 
-        /* List View */
         .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #eee; transition: 0.3s; cursor: pointer; }
         .card:hover { transform: translateY(-3px); border-color: #1a5e63; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .syllabus-tag { color: #b8860b; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1.2px; }
         .card h2 { font-family: 'Montserrat', sans-serif; color: #1a5e63; margin: 10px 0; font-size: 1.5rem; }
         .excerpt { color: #666; font-size: 0.95rem; }
 
-        /* Reader Mode */
         #reader-view { display: none; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); margin-top: -40px; }
         .btn-container { display: flex; justify-content: space-between; align-items: center; margin: 30px 0; }
         .back-btn { background: #1a5e63; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-family: 'Montserrat'; font-weight: bold; cursor: pointer; transition: 0.2s; text-transform: uppercase; font-size: 0.8rem; }
@@ -47,6 +42,12 @@
         .full-content-body img { max-width: 100%; border-radius: 10px; margin: 25px 0; display: block; margin-left: auto; margin-right: auto; }
         #status-msg { text-align: center; padding: 40px; font-family: 'Montserrat'; }
         hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
+
+        /* FOOTER STYLING */
+        footer { background: #0d2f31; color: white; padding: 40px 20px; text-align: center; margin-top: 50px; font-family: 'Montserrat', sans-serif; }
+        .footer-content { max-width: 600px; margin: auto; }
+        .footer-credit { font-size: 0.75rem; letter-spacing: 1px; color: #f4d03f; margin-top: 20px; text-transform: uppercase; }
+        .footer-about { font-size: 0.85rem; opacity: 0.8; font-weight: 300; line-height: 1.8; }
     </style>
 </head>
 <body>
@@ -75,6 +76,14 @@
         </div>
     </div>
 </div>
+
+<footer>
+    <div class="footer-content">
+        <p class="footer-about">The English Archive is a non-profit initiative dedicated to providing peer-reviewed, affordable academic notes for BA English Honours students across India. Our mission is to democratize high-quality literary analysis.</p>
+        <div class="footer-credit">Developed by: Mithun Biswas</div>
+        <div style="font-size: 10px; margin-top: 15px; opacity: 0.5;">&copy; 2026 The English Archive</div>
+    </div>
+</footer>
 
 <script>
     const GITHUB_USER = "mithunbiswas15-git"; 

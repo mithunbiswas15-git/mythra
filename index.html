@@ -16,32 +16,35 @@
         .hero h1 { font-family: 'Montserrat', sans-serif; letter-spacing: 6px; color: #f4d03f; margin: 0; font-size: 2rem; }
         
         .container { max-width: 800px; margin: -30px auto 60px; padding: 0 20px; }
-        
-        /* Card Styling */
+
+        /* List View */
         .card { 
             background: white; padding: 30px; border-radius: 12px; 
             box-shadow: 0 5px 20px rgba(0,0,0,0.05); margin-bottom: 20px; 
             border: 1px solid #eee; transition: 0.3s; cursor: pointer;
-            overflow: hidden;
         }
-        .card:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-color: #1a5e63; }
-        
+        .card:hover { transform: translateY(-3px); border-color: #1a5e63; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .syllabus-tag { color: #b8860b; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1.2px; }
         .card h2 { font-family: 'Montserrat', sans-serif; color: #1a5e63; margin: 10px 0; font-size: 1.5rem; }
-        
-        /* Excerpt vs Full Content */
-        .excerpt { color: #666; font-size: 1rem; display: block; }
-        .full-content { display: none; margin-top: 20px; padding-top: 20px; border-top: 1px dashed #ccc; }
-        .full-content img { max-width: 100%; border-radius: 8px; margin: 20px 0; }
-        
-        /* When card is active */
-        .card.active { cursor: default; border-left: 5px solid #f4d03f; }
-        .card.active .excerpt { display: none; }
-        .card.active .full-content { display: block; }
+        .excerpt { color: #666; font-size: 0.95rem; }
 
-        .read-more { color: #1a5e63; font-weight: bold; font-size: 0.8rem; text-transform: uppercase; margin-top: 15px; display: inline-block; }
+        /* Reader Mode */
+        #reader-view { display: none; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); margin-top: -40px; }
         
+        .btn-container { display: flex; justify-content: space-between; align-items: center; margin: 30px 0; }
+        
+        .back-btn { 
+            background: #1a5e63; color: white; border: none; padding: 12px 24px; 
+            border-radius: 6px; font-family: 'Montserrat'; font-weight: bold; 
+            cursor: pointer; transition: 0.2s; text-transform: uppercase; font-size: 0.8rem;
+        }
+        .back-btn:hover { background: #f4d03f; color: #1a5e63; }
+        
+        .full-content-body { font-size: 1.15rem; color: #2c3e50; text-align: justify; margin-bottom: 40px; }
+        .full-content-body img { max-width: 100%; border-radius: 10px; margin: 25px 0; display: block; margin-left: auto; margin-right: auto; }
+
         #status-msg { text-align: center; padding: 40px; font-family: 'Montserrat'; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
     </style>
 </head>
 <body>
@@ -53,7 +56,20 @@
 
 <div class="container">
     <div id="status-msg">📜 Unrolling the manuscripts...</div>
+    
     <div id="articles-list"></div>
+
+    <div id="reader-view">
+        <button class="back-btn" onclick="closeReader()">← Close Note</button>
+        
+        <div id="reader-content"></div>
+        
+        <hr>
+        <div class="btn-container">
+            <button class="back-btn" onclick="closeReader()">← Return to Archive</button>
+            <button class="back-btn" style="background: #eee; color: #333;" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑ Top</button>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -61,44 +77,67 @@
     const REPO_NAME = "mythra"; 
     const csvUrl = `https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/main/articles.csv`;
 
+    let allArticles = [];
+
     function loadData() {
         Papa.parse(csvUrl, {
             download: true,
             header: true,
             skipEmptyLines: true,
             complete: function(results) {
-                const list = document.getElementById('articles-list');
                 document.getElementById('status-msg').style.display = 'none';
-                
-                // Sort Newest First
-                const sorted = results.data.sort((a, b) => b.id - a.id);
-
-                sorted.forEach(art => {
-                    if(art.title && art.status === "Published") {
-                        const card = document.createElement('div');
-                        card.className = 'card';
-                        
-                        // Create a clean text summary (no HTML tags)
-                        const plainText = art.content.replace(/<[^>]*>/g, '').substring(0, 120);
-
-                        card.innerHTML = `
-                            <span class="syllabus-tag">${art.syllabus || 'Archive'}</span>
-                            <h2>${art.title}</h2>
-                            <div class="excerpt">${plainText}... <br><span class="read-more">Click to read full note →</span></div>
-                            <div class="full-content">${art.content}</div>
-                        `;
-                        
-                        // Click to Expand Logic
-                        card.onclick = function() {
-                            this.classList.toggle('active');
-                        };
-                        
-                        list.appendChild(card);
-                    }
-                });
+                allArticles = results.data.sort((a, b) => b.id - a.id);
+                renderList();
             }
         });
     }
+
+    function renderList() {
+        const list = document.getElementById('articles-list');
+        const reader = document.getElementById('reader-view');
+        list.innerHTML = '';
+        reader.style.display = 'none';
+        list.style.display = 'block';
+
+        allArticles.forEach(art => {
+            if(art.title && art.status === "Published") {
+                const card = document.createElement('div');
+                card.className = 'card';
+                const plainText = art.content.replace(/<[^>]*>/g, '').substring(0, 150);
+
+                card.innerHTML = `
+                    <span class="syllabus-tag">${art.syllabus || 'Archive'}</span>
+                    <h2>${art.title}</h2>
+                    <div class="excerpt">${plainText}...</div>
+                `;
+                
+                card.onclick = () => openReader(art);
+                list.appendChild(card);
+            }
+        });
+    }
+
+    function openReader(art) {
+        document.getElementById('articles-list').style.display = 'none';
+        const reader = document.getElementById('reader-view');
+        const content = document.getElementById('reader-content');
+        
+        content.innerHTML = `
+            <span class="syllabus-tag" style="margin-top:20px; display:block;">${art.syllabus}</span>
+            <h1 style="font-family: Montserrat; color: #1a5e63; margin-top:10px; line-height:1.2;">${art.title}</h1>
+            <hr>
+            <div class="full-content-body">${art.content}</div>
+        `;
+        
+        reader.style.display = 'block';
+        window.scrollTo(0, 0); 
+    }
+
+    function closeReader() {
+        renderList();
+        window.scrollTo(0, 0);
+    }
+
     loadData();
 </script>
 

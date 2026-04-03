@@ -11,11 +11,19 @@
         
         .hero { 
             background: linear-gradient(135deg, #1a5e63 0%, #0d2f31 100%); 
-            padding: 60px 20px; text-align: center; color: white; 
+            padding: 50px 20px; text-align: center; color: white; 
         }
         .hero h1 { font-family: 'Montserrat', sans-serif; letter-spacing: 6px; color: #f4d03f; margin: 0; font-size: 2rem; }
         
         .container { max-width: 800px; margin: -30px auto 60px; padding: 0 20px; }
+
+        /* Search Bar */
+        #search-container { margin-bottom: 25px; display: block; }
+        #search-bar { 
+            width: 100%; padding: 15px; border-radius: 8px; border: 1px solid #ddd; 
+            font-family: 'Montserrat'; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            box-sizing: border-box; font-size: 1rem;
+        }
 
         /* List View */
         .card { 
@@ -24,15 +32,14 @@
             border: 1px solid #eee; transition: 0.3s; cursor: pointer;
         }
         .card:hover { transform: translateY(-3px); border-color: #1a5e63; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .id-badge { background: #f4d03f; color: #1a5e63; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.7rem; margin-right: 10px; font-family: 'Montserrat'; }
         .syllabus-tag { color: #b8860b; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1.2px; }
         .card h2 { font-family: 'Montserrat', sans-serif; color: #1a5e63; margin: 10px 0; font-size: 1.5rem; }
         .excerpt { color: #666; font-size: 0.95rem; }
 
         /* Reader Mode */
         #reader-view { display: none; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); margin-top: -40px; }
-        
         .btn-container { display: flex; justify-content: space-between; align-items: center; margin: 30px 0; }
-        
         .back-btn { 
             background: #1a5e63; color: white; border: none; padding: 12px 24px; 
             border-radius: 6px; font-family: 'Montserrat'; font-weight: bold; 
@@ -40,7 +47,7 @@
         }
         .back-btn:hover { background: #f4d03f; color: #1a5e63; }
         
-        .full-content-body { font-size: 1.15rem; color: #2c3e50; text-align: justify; margin-bottom: 40px; }
+        .full-content-body { font-size: 1.15rem; color: #2c3e50; text-align: justify; }
         .full-content-body img { max-width: 100%; border-radius: 10px; margin: 25px 0; display: block; margin-left: auto; margin-right: auto; }
 
         #status-msg { text-align: center; padding: 40px; font-family: 'Montserrat'; }
@@ -57,13 +64,15 @@
 <div class="container">
     <div id="status-msg">📜 Unrolling the manuscripts...</div>
     
+    <div id="search-container">
+        <input type="text" id="search-bar" placeholder="Search by ID, Title, or Topic..." onkeyup="filterArticles()">
+    </div>
+
     <div id="articles-list"></div>
 
     <div id="reader-view">
         <button class="back-btn" onclick="closeReader()">← Close Note</button>
-        
         <div id="reader-content"></div>
-        
         <hr>
         <div class="btn-container">
             <button class="back-btn" onclick="closeReader()">← Return to Archive</button>
@@ -86,27 +95,37 @@
             skipEmptyLines: true,
             complete: function(results) {
                 document.getElementById('status-msg').style.display = 'none';
-                allArticles = results.data.sort((a, b) => b.id - a.id);
-                renderList();
+                
+                // IMPORTANT: Changed sorting to Ascending (a.id - b.id)
+                // This puts ID 1 at the top.
+                allArticles = results.data.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+                
+                renderList(allArticles);
             }
         });
     }
 
-    function renderList() {
+    function renderList(articlesToRender) {
         const list = document.getElementById('articles-list');
         const reader = document.getElementById('reader-view');
+        const search = document.getElementById('search-container');
+        
         list.innerHTML = '';
         reader.style.display = 'none';
         list.style.display = 'block';
+        search.style.display = 'block';
 
-        allArticles.forEach(art => {
+        articlesToRender.forEach(art => {
             if(art.title && art.status === "Published") {
                 const card = document.createElement('div');
                 card.className = 'card';
                 const plainText = art.content.replace(/<[^>]*>/g, '').substring(0, 150);
 
                 card.innerHTML = `
-                    <span class="syllabus-tag">${art.syllabus || 'Archive'}</span>
+                    <div>
+                        <span class="id-badge">ID: ${art.id}</span>
+                        <span class="syllabus-tag">${art.syllabus || 'Archive'}</span>
+                    </div>
                     <h2>${art.title}</h2>
                     <div class="excerpt">${plainText}...</div>
                 `;
@@ -117,13 +136,24 @@
         });
     }
 
+    function filterArticles() {
+        const query = document.getElementById('search-bar').value.toLowerCase();
+        const filtered = allArticles.filter(art => {
+            return art.title.toLowerCase().includes(query) || 
+                   art.id.toString().includes(query) ||
+                   art.syllabus.toLowerCase().includes(query);
+        });
+        renderList(filtered);
+    }
+
     function openReader(art) {
         document.getElementById('articles-list').style.display = 'none';
+        document.getElementById('search-container').style.display = 'none';
         const reader = document.getElementById('reader-view');
         const content = document.getElementById('reader-content');
         
         content.innerHTML = `
-            <span class="syllabus-tag" style="margin-top:20px; display:block;">${art.syllabus}</span>
+            <span class="syllabus-tag" style="margin-top:20px; display:block;">ID: ${art.id} | ${art.syllabus}</span>
             <h1 style="font-family: Montserrat; color: #1a5e63; margin-top:10px; line-height:1.2;">${art.title}</h1>
             <hr>
             <div class="full-content-body">${art.content}</div>
@@ -134,7 +164,8 @@
     }
 
     function closeReader() {
-        renderList();
+        document.getElementById('search-container').style.display = 'block';
+        renderList(allArticles);
         window.scrollTo(0, 0);
     }
 
